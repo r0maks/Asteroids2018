@@ -10,7 +10,8 @@ var mousePositions = [];
 var ship = null;
 var missles = [];
 
-var asteroidsLimit = 2;
+var asteroidsLimit = 3;
+var asteroids = [];
 
 
 var Y_AXIS = 1;
@@ -23,6 +24,7 @@ function setup() {
     createCanvas(WINDOW_WIDTH, WINDOW_HEIGHT);
     frameRate(20);
     noCursor();
+    noFill();
 }
 
 function draw() {
@@ -36,6 +38,27 @@ function draw() {
     drawMissles();
 
     drawAsteroids();
+
+    handleCollisions();
+}
+
+function handleCollisions() {
+
+    for (var missleIndex = 0; missleIndex <  missles.length; missleIndex++) {
+        var missle = missles[missleIndex];
+
+        for (var asteroidIndex = 0; asteroidIndex <  asteroids.length; asteroidIndex++) {
+            var asteroid = asteroids[asteroidIndex];
+
+            if (isCollision(asteroid, missle)) {
+                asteroids.splice(asteroidIndex, 1);
+                missles.splice(missleIndex, 1);
+            }
+    
+        }
+
+    }
+
 }
 
 function drawBackground() {
@@ -49,7 +72,6 @@ function drawBackground() {
 
     for (var starIndex = 0; starIndex < bgParticles.length; starIndex++) {
         var star = bgParticles[starIndex];
-        stroke(random(0, 100));
         star.y = star.y + random(1, 5); // get random speed
 
         // recycle star if it's at the bottom
@@ -58,6 +80,7 @@ function drawBackground() {
             star.x = random(0, WINDOW_WIDTH);
         }
 
+        stroke(255);
         ellipse(star.x, star.y, star.w, star.h); 
     }
 
@@ -65,10 +88,49 @@ function drawBackground() {
 
 function drawAsteroids () {
 
+    if (asteroids.length < asteroidsLimit) {
+        buildAsteroids();
+    }
+
+    for (var starIndex = 0; starIndex < asteroids.length; starIndex++) {
+        var star = asteroids[starIndex];
+        star.y = star.y + 10; // get random speed
+
+        // recycle star if it's at the bottom
+        if (star.y > WINDOW_HEIGHT) {
+            star.y = 0
+            star.x = random(0, WINDOW_WIDTH);
+        }
+
+        stroke(255);
+        ellipse(star.x, star.y, star.w, star.h); 
+    }
+}
+
+function buildAsteroids() {
+
+    for (var starIndex = 0; starIndex < asteroidsLimit; starIndex++) {
+
+        var range = random(60, 100);
+
+        var size = random(20, range);
+
+        var w = size;
+        var h = size;
+        var x = random(0, WINDOW_WIDTH);
+        var y = 0
+
+        asteroids.push({
+            x: x, y: y,
+            w: w, h: h,
+        });
+    }
+
 }
 
 function drawShip() {
     var offset = 15;
+    stroke(255);
     triangle(mouseX + offset, mouseY + offset, mouseX - offset, mouseY + offset, mouseX , mouseY - offset);
 
     for(var mIndex = 0; mIndex < missles.length; mIndex++) {
@@ -147,6 +209,12 @@ function mouseMoved() {
     if (mousePositions.length > 20) {
         mousePositions.splice(0, 1);
     }
+
+}
+
+function isCollision(c1, c2) {
+
+    return dist( c1.x, c1.y, c2.x, c2.y) < c1.w + c2.w;
 
 }
 
