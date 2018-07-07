@@ -12,7 +12,8 @@ var missles = [];
 
 var asteroidsLimit = 3;
 var asteroids = [];
-
+var xPos;
+var yPos;
 
 var Y_AXIS = 1;
 var X_AXIS = 2;
@@ -40,25 +41,31 @@ function draw() {
     drawAsteroids();
 
     handleCollisions();
+
 }
 
 function handleCollisions() {
 
-    for (var missleIndex = 0; missleIndex <  missles.length; missleIndex++) {
-        var missle = missles[missleIndex];
+    // with missles
+    for (var asteroidIndex = 0; asteroidIndex < asteroids.length; asteroidIndex++) {
+        var asteroid = asteroids[asteroidIndex];
 
-        for (var asteroidIndex = 0; asteroidIndex <  asteroids.length; asteroidIndex++) {
-            var asteroid = asteroids[asteroidIndex];
+        // with ship
+        if (isCollision(asteroid, {x: mouseX, y: mouseY, w: 7.5})) {
+            text('HIT', 15, 30, 100, 50); 
+        }
+
+        // Missiles with asteroids
+        for (var missleIndex = 0; missleIndex < missles.length; missleIndex++) {
+            var missle = missles[missleIndex];
 
             if (isCollision(asteroid, missle)) {
                 asteroids.splice(asteroidIndex, 1);
                 missles.splice(missleIndex, 1);
             }
-    
         }
 
     }
-
 }
 
 function drawBackground() {
@@ -118,7 +125,7 @@ function buildAsteroids() {
         var w = size;
         var h = size;
         var x = random(0, WINDOW_WIDTH);
-        var y = 0
+        var y = -30
 
         asteroids.push({
             x: x, y: y,
@@ -129,29 +136,41 @@ function buildAsteroids() {
 }
 
 function drawShip() {
+
+    if (!xPos || !yPos) {
+        xPos = mouseX;
+        yPos = mouseY;
+    }
+
+    var easing = .1;
+    var targetX = mouseX;
+    console.log('targetX: '+targetX);
+    var dx = targetX - xPos;
+    console.log('xPos: '+xPos);
+
+    xPos += dx * easing;
+    
+    var targetY = mouseY;
+    var dy = targetY - yPos;
+    yPos += dy * easing;
+
     var offset = 15;
     stroke(255);
-    triangle(mouseX + offset, mouseY + offset, mouseX - offset, mouseY + offset, mouseX , mouseY - offset);
+    triangle(xPos + offset, yPos + offset, xPos - offset, yPos + offset, xPos , yPos - offset);
 
+
+    // missiles
     for(var mIndex = 0; mIndex < missles.length; mIndex++) {
         var missle = missles[mIndex];
 
         missle.y = missle.y - 20; // get random speed
 
         if (missle.y > WINDOW_HEIGHT) {
-
+            missles.splice(mIndex);
         }
 
         stroke(250, 120, 120);
         ellipse(missle.x, missle.y, missle.w, missle.h); 
-    }
-}
-
-function drawMouseTrail(){
-    for (var index = 0; index < mousePositions.length; index++) {
-        var pos = mousePositions[index];
-        stroke(255, 0, 0);
-        ellipse(pos.x, pos.y, 2, 2); 
     }
 }
 
@@ -206,7 +225,7 @@ function mouseMoved() {
     // console.log("Mouse pos: x: " + mouseX + " y: " + mouseY);
     mousePositions.push({ x: mouseX, y: mouseY });
 
-    if (mousePositions.length > 20) {
+    if (mousePositions.length > 1000) {
         mousePositions.splice(0, 1);
     }
 
