@@ -23,7 +23,7 @@ var c1, c2;
 function setup() {
 
     createCanvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-    frameRate(20);
+    frameRate(60);
     noCursor();
     noFill();
 }
@@ -51,7 +51,7 @@ function handleCollisions() {
         var asteroid = asteroids[asteroidIndex];
 
         // with ship
-        if (isCollision(asteroid, {x: mouseX, y: mouseY, w: 7.5})) {
+        if (isCollision(asteroid, {x: xPos, y: yPos, w: 5})) {
             text('HIT', 15, 30, 100, 50); 
         }
 
@@ -66,6 +66,10 @@ function handleCollisions() {
         }
 
     }
+}
+
+function drawExplosion() {
+    
 }
 
 function drawBackground() {
@@ -101,7 +105,7 @@ function drawAsteroids () {
 
     for (var starIndex = 0; starIndex < asteroids.length; starIndex++) {
         var star = asteroids[starIndex];
-        star.y = star.y + 10; // get random speed
+        star.y = star.y + 8; // get random speed
 
         // recycle star if it's at the bottom
         if (star.y > WINDOW_HEIGHT) {
@@ -142,11 +146,9 @@ function drawShip() {
         yPos = mouseY;
     }
 
-    var easing = .1;
+    var easing = .08;
     var targetX = mouseX;
-    console.log('targetX: '+targetX);
     var dx = targetX - xPos;
-    console.log('xPos: '+xPos);
 
     xPos += dx * easing;
     
@@ -193,10 +195,8 @@ function buildNightSky() {
 
     for (var starIndex = 0; starIndex < bgParticlesLimit; starIndex++) {
 
-        var range = random(2, 4);
-
-        var w = random(2, range);
-        var h = random(2, range);
+        var w = random(2, 4);
+        var h = random(2, 4);
         var x = random(0, WINDOW_WIDTH);
         var y = random(0, WINDOW_HEIGHT);
 
@@ -209,7 +209,7 @@ function buildNightSky() {
 
 function mouseClicked() {
     // always set the current mouse position
-    addMissle(mouseX, mouseY);
+    addMissle(xPos, yPos);
 
 }
 
