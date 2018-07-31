@@ -18,11 +18,17 @@ var yPos;
 var Y_AXIS = 1;
 var X_AXIS = 2;
 var c1, c2;
+var explosion;
+
+function preload() {
+    explosion = loadSound('assets/explosion.mp3');
+}
 
 // base set up
 function setup() {
 
     createCanvas(WINDOW_WIDTH, WINDOW_HEIGHT);
+
     frameRate(60);
     noCursor();
     noFill();
@@ -59,7 +65,13 @@ function handleCollisions() {
         for (var missleIndex = 0; missleIndex < missles.length; missleIndex++) {
             var missle = missles[missleIndex];
 
+            if (explosion.isPlaying()) {
+                explosion.stop();
+            }
+            explosion.play();
+
             if (isCollision(asteroid, missle)) {
+
                 asteroids.splice(asteroidIndex, 1);
                 missles.splice(missleIndex, 1);
             }
