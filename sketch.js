@@ -3,14 +3,14 @@
 // Constants
 var WINDOW_WIDTH = 1024;
 var WINDOW_HEIGHT = 768;
-var bgParticlesLimit = 500;
+var bgParticlesLimit = 1000;
 var bgParticles = [];
 
 var mousePositions = [];
 var ship = null;
 var missles = [];
 
-var asteroidsLimit = 3;
+var asteroidsLimit = 5;
 var asteroids = [];
 var xPos;
 var yPos;
@@ -21,7 +21,7 @@ var c1, c2;
 var explosion;
 
 function preload() {
-    explosion = loadSound('assets/explosion.mp3');
+    // explosion = loadSound('assets/explosion.mp3');
 }
 
 // base set up
@@ -65,10 +65,10 @@ function handleCollisions() {
         for (var missleIndex = 0; missleIndex < missles.length; missleIndex++) {
             var missle = missles[missleIndex];
 
-            if (explosion.isPlaying()) {
-                explosion.stop();
-            }
-            explosion.play();
+            // if (explosion.isPlaying()) {
+            //     explosion.stop();
+            // }
+            // explosion.play();
 
             if (isCollision(asteroid, missle)) {
 
@@ -117,7 +117,7 @@ function drawAsteroids () {
 
     for (var starIndex = 0; starIndex < asteroids.length; starIndex++) {
         var star = asteroids[starIndex];
-        star.y = star.y + 8; // get random speed
+        star.y = star.y + 8;
 
         // recycle star if it's at the bottom
         if (star.y > WINDOW_HEIGHT) {
@@ -171,31 +171,16 @@ function drawShip() {
     var offset = 15;
     stroke(255);
     triangle(xPos + offset, yPos + offset, xPos - offset, yPos + offset, xPos , yPos - offset);
-
-
-    // missiles
-    for(var mIndex = 0; mIndex < missles.length; mIndex++) {
-        var missle = missles[mIndex];
-
-        missle.y = missle.y - 20; // get random speed
-
-        if (missle.y > WINDOW_HEIGHT) {
-            missles.splice(mIndex);
-        }
-
-        stroke(250, 120, 120);
-        ellipse(missle.x, missle.y, missle.w, missle.h); 
-    }
 }
 
 function drawMissles() {
     for(var mIndex = 0; mIndex < missles.length; mIndex++) {
         var missle = missles[mIndex];
 
-        missle.y = missle.y - 20; // get random speed
+        missle.y = missle.y - 20;
 
         if (missle.y > WINDOW_HEIGHT) {
-
+            missles.splice(mIndex, 1);
         }
 
         stroke(250, 120, 120);
