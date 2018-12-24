@@ -12,6 +12,7 @@ var missles = [];
 
 var asteroidsLimit = 10;
 var asteroids = [];
+var ASTEROID_MAX_RADIUS = 100;
 var xPos;
 var yPos;
 
@@ -22,7 +23,7 @@ var explosion;
 var mode = 1;
 var health = 100;
 var points = 0;
-
+var historicalPoints = [];
 
 // base set up
 function setup() {
@@ -48,6 +49,7 @@ function draw() {
             handleCollisions();
             handleMissleCollisions();
             showHealth();
+            showPoints();
             break;
     }
 }
@@ -55,6 +57,13 @@ function draw() {
 function showStartGame() {
     textSize(60);
     text('Start game?', WINDOW_WIDTH / 5, WINDOW_HEIGHT / 2);
+    textSize(30);
+    text('Your Score: ' + points, 25, 105);
+    // text('Past scores: ' + points, 25, 130);
+    // var index = 0;
+    // historicalPoints.forEach(p => {
+    //     text('Past scores: ' + p, 25, 130);
+    // });
 }
 
 function showHealth() {
@@ -62,6 +71,13 @@ function showHealth() {
     fill(255, 200, 0);
     rect(25, 25, health, 50);
     noFill();
+}
+
+function showPoints() {
+    // add points for being alive:
+    // addPoints(1);
+    textSize(30);
+    text('Points: ' + points, 25, 105);
 }
 
 
@@ -76,11 +92,12 @@ function handleMissleCollisions() {
             var missle = missles[missleIndex];
 
             if (isCollision(asteroid, missle)) {
+                // add points in proportion to size (width or height) of asteroid                
+                addPoints(Math.round(map(asteroid.w, 20, 100, 0, 10)));
                 asteroids.splice(asteroidIndex, 1);
                 missles.splice(missleIndex, 1);
             }
         }
-
     }
 }
 
@@ -152,8 +169,8 @@ function buildAsteroids() {
 
     for (var starIndex = 0; starIndex < asteroidsLimit; starIndex++) {
 
-        var range = random(60, 100);
-        var size = random(20, range);
+        var range = random(60, ASTEROID_MAX_RADIUS);
+        var size = random(30, range);
 
         var w = size;
         var h = size;
@@ -245,6 +262,8 @@ function mouseClicked() {
 }
 
 function startGame() {
+    asteroids = [];
+    missles = [];
     mode = 2;
     health = 100;
     points = 0;
@@ -252,6 +271,8 @@ function startGame() {
 
 function endGame() {
     mode = 1;
+    // log the points for the game
+    historicalPoints.push(points);
 }
 
 function addMissle(x, y) {
@@ -263,13 +284,18 @@ function addMissle(x, y) {
 }
 
 function mouseMoved() {
+    // TODO: track ship positions instead
     mousePositions.push({ x: mouseX, y: mouseY });
     if (mousePositions.length > 1000) {
         mousePositions.splice(0, 1);
     }
 }
 
+function addPoints(val) {
+    points = points + val;
+}
+
 function isCollision(c1, c2) {
-    return dist(c1.x, c1.y, c2.x, c2.y) < c1.w + c2.w;
+    return dist(c1.x, c1.y, c2.x, c2.y) <= c1.w + c2.w;
 }
 
