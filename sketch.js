@@ -10,7 +10,7 @@ var mousePositions = [];
 var ship = null;
 var missles = [];
 
-var asteroidsLimit = 5;
+var asteroidsLimit = 10;
 var asteroids = [];
 var xPos;
 var yPos;
@@ -19,18 +19,15 @@ var Y_AXIS = 1;
 var X_AXIS = 2;
 var c1, c2;
 var explosion;
+var mode = 1;
+var health = 100;
+var points = 0;
 
-function preload() {
-    // explosion = loadSound('assets/explosion.mp3');
-}
 
 // base set up
 function setup() {
-
     createCanvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-
     frameRate(60);
-    noCursor();
     noFill();
 }
 
@@ -38,40 +35,47 @@ function draw() {
 
     drawBackground();
 
-    drawShip();
-
-    // drawMouseTrail();
-
-    drawMissles();
-
-    drawAsteroids();
-
-    handleCollisions();
-
+    switch (mode) {
+        default:
+        case 1:
+            showStartGame();
+            break;
+        case 2:
+            noCursor();
+            drawShip();
+            drawMissles();
+            drawAsteroids();
+            handleCollisions();
+            handleMissleCollisions();
+            showHealth();
+            break;
+    }
 }
 
-function handleCollisions() {
+function showStartGame() {
+    textSize(60);
+    text('Start game?', WINDOW_WIDTH / 5, WINDOW_HEIGHT / 2);
+}
+
+function showHealth() {
+    rect(25, 25, 100, 50);
+    fill(255, 200, 0);
+    rect(25, 25, health, 50);
+    noFill();
+}
+
+
+function handleMissleCollisions() {
 
     // with missles
     for (var asteroidIndex = 0; asteroidIndex < asteroids.length; asteroidIndex++) {
         var asteroid = asteroids[asteroidIndex];
 
-        // with ship
-        if (isCollision(asteroid, {x: xPos, y: yPos, w: 5})) {
-            text('HIT', 15, 30, 100, 50); 
-        }
-
         // Missiles with asteroids
         for (var missleIndex = 0; missleIndex < missles.length; missleIndex++) {
             var missle = missles[missleIndex];
 
-            // if (explosion.isPlaying()) {
-            //     explosion.stop();
-            // }
-            // explosion.play();
-
             if (isCollision(asteroid, missle)) {
-
                 asteroids.splice(asteroidIndex, 1);
                 missles.splice(missleIndex, 1);
             }
@@ -80,12 +84,27 @@ function handleCollisions() {
     }
 }
 
-function drawExplosion() {
-    
+function handleCollisions() {
+
+    // with missles
+    for (var asteroidIndex = 0; asteroidIndex < asteroids.length; asteroidIndex++) {
+        var asteroid = asteroids[asteroidIndex];
+
+        // collision with ship
+        if (isCollision(asteroid, { x: xPos, y: yPos, w: 5 })) {
+            text('HIT', 15, 30, 100, 50);
+            health = health - 25;
+            if (health <= 0) {
+                endGame();
+            }
+            asteroids.splice(asteroidIndex, 1);
+            return;
+        }
+    }
 }
 
 function drawBackground() {
-    
+
     // redraw background
     background(42);
 
@@ -104,12 +123,12 @@ function drawBackground() {
         }
 
         stroke(255);
-        ellipse(star.x, star.y, star.w, star.h); 
+        ellipse(star.x, star.y, star.w, star.h);
     }
 
 }
 
-function drawAsteroids () {
+function drawAsteroids() {
 
     if (asteroids.length < asteroidsLimit) {
         buildAsteroids();
@@ -124,9 +143,8 @@ function drawAsteroids () {
             star.y = 0
             star.x = random(0, WINDOW_WIDTH);
         }
-
         stroke(255);
-        ellipse(star.x, star.y, star.w, star.h); 
+        ellipse(star.x, star.y, star.w, star.h);
     }
 }
 
@@ -135,7 +153,6 @@ function buildAsteroids() {
     for (var starIndex = 0; starIndex < asteroidsLimit; starIndex++) {
 
         var range = random(60, 100);
-
         var size = random(20, range);
 
         var w = size;
@@ -143,12 +160,25 @@ function buildAsteroids() {
         var x = random(0, WINDOW_WIDTH);
         var y = -30
 
-        asteroids.push({
+        var newAsteroid = {
             x: x, y: y,
             w: w, h: h,
-        });
+        };
+
+        addAsteroidIfPossible(newAsteroid);
+    }
+}
+
+function addAsteroidIfPossible(a) {
+
+    for (var asteroidIndex = 0; asteroidIndex < asteroids.length; asteroidIndex++) {
+        var asteroid = asteroids[asteroidIndex];
+        if (isCollision(asteroid, a)) {
+            return;
+        }
     }
 
+    asteroids.push(a);
 }
 
 function drawShip() {
@@ -163,18 +193,18 @@ function drawShip() {
     var dx = targetX - xPos;
 
     xPos += dx * easing;
-    
+
     var targetY = mouseY;
     var dy = targetY - yPos;
     yPos += dy * easing;
 
     var offset = 15;
     stroke(255);
-    triangle(xPos + offset, yPos + offset, xPos - offset, yPos + offset, xPos , yPos - offset);
+    triangle(xPos + offset, yPos + offset, xPos - offset, yPos + offset, xPos, yPos - offset);
 }
 
 function drawMissles() {
-    for(var mIndex = 0; mIndex < missles.length; mIndex++) {
+    for (var mIndex = 0; mIndex < missles.length; mIndex++) {
         var missle = missles[mIndex];
 
         missle.y = missle.y - 20;
@@ -184,7 +214,7 @@ function drawMissles() {
         }
 
         stroke(250, 120, 120);
-        ellipse(missle.x, missle.y, missle.w, missle.h); 
+        ellipse(missle.x, missle.y, missle.w, missle.h);
     }
 }
 
@@ -205,9 +235,23 @@ function buildNightSky() {
 }
 
 function mouseClicked() {
+
+    if (mode === 1) {
+        startGame();
+    }
+
     // always set the current mouse position
     addMissle(xPos, yPos);
+}
 
+function startGame() {
+    mode = 2;
+    health = 100;
+    points = 0;
+}
+
+function endGame() {
+    mode = 1;
 }
 
 function addMissle(x, y) {
@@ -219,18 +263,13 @@ function addMissle(x, y) {
 }
 
 function mouseMoved() {
-    // console.log("Mouse pos: x: " + mouseX + " y: " + mouseY);
     mousePositions.push({ x: mouseX, y: mouseY });
-
     if (mousePositions.length > 1000) {
         mousePositions.splice(0, 1);
     }
-
 }
 
 function isCollision(c1, c2) {
-
-    return dist( c1.x, c1.y, c2.x, c2.y) < c1.w + c2.w;
-
+    return dist(c1.x, c1.y, c2.x, c2.y) < c1.w + c2.w;
 }
 
